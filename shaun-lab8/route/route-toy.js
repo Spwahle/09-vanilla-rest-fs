@@ -1,82 +1,62 @@
 'use strict';
-
-const debug = require('debug')('http:route-toy');
-const Toy = require('../model/toy');
 const storage = require('../lib/storage');
-const router = require('../lib/router');
+const debug = require('debug')('http:route-toy');
+const createError = require('http-errors');
 
 module.exports = function(router) {
-  router.post('/api/toy', (req, res) => {
+  router.post('/api/toy', (req, res, next) => {
     debug('/api/toy POST');
-    try {
-      let newToy = new Toy(req.body.name, req.body.desc);
-      // if successful, store this thing in memory using the storage module
-      storage.create('toy', newToy)
-        .then(toy => {
-          res.writeHead(201, {'Content-Type': 'application/json'});
-          res.write(JSON.stringify(toy));
-          res.end();
-        });
-    } catch(e) {
-      console.error(e);
-      res.writeHead(400, {'Content-Type': 'text/plain'});
-      res.write('bad request: could not create a new toy');
-      res.end();
-    }
+
+    return storage.create(req.body)
+      .then(toy => res.status(201).send(toy))
+      .catch(err => next(err));
   });
 
-  router.get('/api/toy', (req, res) => {
+  // This is how express allows dynamic routes via parameters
+  // http GET :3000/api/toy/1234-5678
+  // req.params._id => 1234-5678
+
+  // This is how our vanilla http servers were structured
+  // http GET :3000/api/toy?_id=1234-5678
+  // req.query._id => 1234-5678
+
+  // superagent request:
+  // superagent.get(':3000/api/toy/1234-5678')
+  // .then(...)
+  // .catch(...)
+  router.get('/api/toy/:_id', (req, res, next) => {
+    debug('/api/toy/:_id GET');
+    if (!req.params._id){
+      err.status;
+    }
+    return storage.fetchOne(req.params._id)
+      .then(toy => res.json(toy))
+      .catch(next);
+
+  });
+
+  router.get('/api/toy', (req, res, next) => {
     debug('/api/toy GET');
-    if(req.url.query._id) {
-      storage.fetchOne('toy', req.url.query._id)
-        .then(toy => {
-          res.writeHead(200, {'Content-Type': 'application/json'});
-          res.write(JSON.stringify(toy));
-          res.end();
-        })
-        .catch(err => {
-          console.error(err);
-          res.writeHead(400, {'Content-Type': 'text/plain'});
-          res.write('bad request; could not find record');
-          res.end();
-        });
-      return;
-    }
+    return storage.fetchAll('toy')
+      .then(data => res.json(data))
+      .catch(next);
 
-    res.writeHead(400, {'Content-Type': 'text/plain'});
-    res.write('bad request; item id required to get record');
-    res.end();
   });
 
-  ///delete method
-  router.delete('/api/toy', (req, res) => {
-    debug('/api/toy DELETE');
-    if(!req.url.query._id){
-      res.writeHead(404);
-      res.write('error - Improper format for DELETE');
-      res.end();
-      return ;
-    }
-    storage.delete('toy', req.url.query._id);
-    res.writeHead(204, {'Content-Type': 'text/plain'});
-    res.write('Deleted item _id' + req.url.query._id + 'from storage');
-    res.end();
-  });
-
-  ///put method
-  router.put('/api/toy', (req, res) => {
+  router.put('/api/toy/:_id', (req, res, next) => {
     debug('/api/toy PUT');
-    if(!req.url.query._id){
-      res.writeHead(400);
-      res.write('error - no id exists to update that record');
-      res.end();
-      return;
-    }
-    storage.put('toy', req.url.query._id, req);
-    res.writeHead(204, {
-      'Content-Type': 'application/json',
-    });
-    res.write('Updated this toy with ' + req.body.name + ' and ' + req.body.desc);
-    res.end();
+
+    return storage.update('toy', req.body, req.params._id)
+      .then(toy => res.status(204).json('yadid it' + toy))
+      .catch(next);
+  });
+
+  router.delete('/api/toy/:_id', (req, res, next) => {
+    debug('/api/toy DELETE');
+    return storage.destroy('toy', req.params._id)
+      .then(() => res.status(204).json('yay'))
+      .catch(err => createError(err.status, err.message), next);
+
+
   });
 };

@@ -1,5 +1,5 @@
 {
-  "name": "lab-08-shaun",
+  "name": "lab-09-Shaun",
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
@@ -22,7 +22,7 @@
   },
   "scripts": {
     "start": "node server.js",
-    "start:watch": "nodemon index.js",
+    "start:watch": "nodemon server.js",
     "start:debug": "DEBUG=http* nodemon server.js",
     "test": "jest",
     "test:watch": "jest --watchAll",
@@ -40,9 +40,6 @@
   },
   "dependencies": {
     "bluebird": "^3.5.0",
-    "body-parser": "^1.17.2",
-    "express": "^4.15.4",
-    "http-errors": "^1.6.2",
     "uuid": "^3.1.0"
   }
 }

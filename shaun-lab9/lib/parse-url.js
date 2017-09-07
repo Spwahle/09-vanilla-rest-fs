@@ -9,9 +9,4 @@ module.exports = function(req) {
   req.url = urlParse(req.url);
   req.url.query = queryParse(req.url.query);
   return Promise.resolve(req);
-  // return new Promise((resolve, reject) => {
-  //   req.url = urlParse(req.url)
-  //   req.url.query = queryParse(req.url.query)
-  //   return resolve(req)
-  // })
 };

@@ -16,23 +16,23 @@ const Router = module.exports = function() {
 };
 
 Router.prototype.get = function(endpoint, callback) {
-  debug(`#Router: mounted ${endpoint} GET`);
+  debug('#Router.get');
   this.routes.GET[endpoint] = callback;
 };
 
 Router.prototype.post = function(endpoint, callback) {
-  debug(`#Router: mounted ${endpoint} POST`);
   this.routes.POST[endpoint] = callback;
+  debug('#Router.get');
 };
 
 Router.prototype.put = function(endpoint, callback) {
-  debug(`#Router: mounted ${endpoint} PUT`);
   this.routes.PUT[endpoint] = callback;
+  debug('#Router.put');
 };
 
 Router.prototype.delete = function(endpoint, callback) {
-  debug(`#Router: mounted ${endpoint} DELETE`);
   this.routes.DELETE[endpoint] = callback;
+  debug('#Router.delete');
 };
 
 Router.prototype.route = function() {
@@ -43,7 +43,6 @@ Router.prototype.route = function() {
     ])
       .then(() => {
         if(typeof this.routes[req.method][req.url.pathname] === 'function') {
-          debug(`Request received:${req.url.pathname}${req.method}`);
           this.routes[req.method][req.url.pathname](req, res);
           return;
         }
@@ -54,7 +53,6 @@ Router.prototype.route = function() {
       })
       .catch(err => {
         console.error(err);
-
         res.writeHead(400, {'Content-Type': 'text/plain'});
         res.write('bad request; something went wrong in the router');
         res.end();

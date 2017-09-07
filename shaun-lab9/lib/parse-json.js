@@ -12,15 +12,14 @@ module.exports = function(req) {
       req.on('end', () => {
         try {
           req.body = JSON.parse(body);
+          if(req.body === '') req.body = {};
           resolve(req);
         } catch(e) {
-          console.error(e);
           reject(e);
         }
       });
 
       req.on('error', err => {
-        console.error(err);
         reject(err);
       });
 
